@@ -968,13 +968,33 @@ fn repo_install(config: &Config, install: &[RepoPackage]) -> Result<i32> {
     Ok(0)
 }
 
+fn duplicate_targets<'a>(actions: &Actions<'a>) -> Vec<String> {
+    let install: Vec<_> = actions.install.iter().collect();
+    let build: Vec<_> = actions.iter_build_pkgs().collect();
+
+    eprintln!("install: {:#?}", install);
+    eprintln!("build: {:#?}", build);
+
+    let mut names = HashSet::new();
+
+    let duplicates = install.iter()
+        .map(|pkg| pkg.pkg.name())
+        .chain(build.iter().map(|pkg| pkg.pkg.name.as_str()))
+        .filter(|&name| !names.insert(name))
+        .map(ToOwned::to_owned)
+        .collect::<Vec<String>>();
+
+    duplicates
+}
+
 fn check_actions(
     config: &Config,
     actions: &mut Actions,
     srcinfo: Option<&Srcinfo>,
 ) -> Result<(Vec<Conflict>, Vec<Conflict>)> {
     let c = config.color;
-    let dups = actions.duplicate_targets();
+
+    let dups = duplicate_targets(actions);
     ensure!(
         dups.is_empty(),
         tr!("duplicate packages: {}", dups.join(" "))
