@@ -972,7 +972,7 @@ fn duplicate_targets<'a>(actions: &Actions<'a>) -> Vec<String> {
     let install: Vec<_> = actions.install.iter().collect();
     let build: Vec<_> = actions.iter_build_pkgs().collect();
 
-    eprintln!("build: {:#?}", actions.build);
+    // eprintln!("build: {:#?}", actions.build);
 
     let mut names = HashSet::new();
 

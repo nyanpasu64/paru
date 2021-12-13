@@ -62,3 +62,6 @@ backtrace = []
 generate = ["alpm/generate"]
 static = ["alpm/static"]
 mock = ["async-trait"]
+
+[patch.crates-io]
+aur-depends = { path = "vendor/aur-depends" }

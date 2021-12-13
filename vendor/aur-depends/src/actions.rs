@@ -20,7 +20,7 @@ pub struct Actions<'a> {
     pub missing: Vec<Missing>,
     /// Targets that are up to date.
     pub unneeded: Vec<Unneeded>,
-    /// Aur packages to build.
+    /// AUR packages to build. Each Base corresponds to a single PKGBUILD producing one or more packages we want to install.
     pub build: Vec<Base>,
     /// Repo packages to install.
     pub install: Vec<RepoPackage<'a>>,
@@ -69,7 +69,7 @@ pub type AurPackage = Package<ArcPackage>;
 /// Wrapper around alpm::Package for extra metadata.
 pub type RepoPackage<'a> = Package<alpm::Package<'a>>;
 
-/// A package base.
+/// A set of packages to be installed, coming from the same PKGBUILD, with the same pkg.package_base.
 #[derive(Debug, Eq, Clone, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Base {
     /// The packages that should be installed from the pkgbase.
@@ -107,6 +107,24 @@ impl Base {
     /// Gets the version of base.
     pub fn version(&self) -> &str {
         self.pkgs[0].pkg.version.as_str()
+    }
+
+    /// Returns whether this base already contains a package with the same name.
+    fn contains(&self, pkg: &AurPackage) -> bool {
+        self.pkgs.iter().any(|existing| existing.pkg.name == pkg.pkg.name)
+    }
+
+    /// Adds a value to the set.
+    ///
+    /// If the set did not have this value present, `true` is returned.
+    ///
+    /// If the set did have this value present, `false` is returned.
+    pub fn insert(&mut self, pkg: AurPackage) -> bool {
+        if !self.contains(&pkg) {
+            self.pkgs.push(pkg);
+            return true;
+        }
+        false
     }
 }
 

@@ -1035,10 +1035,15 @@ impl<'a, 'b, H: Raur + Sync> Resolver<'a, 'b, H> {
         false
     }
 
+    /// Push the package to the build set.
+    ///
+    /// If another package from the same PKGBUILD is set to be built, add it to
+    /// Add the package to an existing set of packages coming from the same PKGBUILD, or add a new PKGBUILD to build (and build a single package)
     fn push_build(&mut self, pkgbase: &str, pkg: AurPackage) {
+        eprintln!("pushing {:?} {} -> {}", self.stack, pkg.pkg.package_base, pkg.pkg.name);
         for base in &mut self.actions.build {
             if base.package_base() == pkgbase {
-                base.pkgs.push(pkg);
+                base.insert(pkg);
                 return;
             }
         }
